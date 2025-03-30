@@ -90,7 +90,7 @@ function ResultsDisplay({ results, isLoading }) {
                 <div>
                   <p className="text-sm text-gray-600">Average Confidence</p>
                   <p className="text-2xl font-bold text-primary-600">
-                    {(results.reduce((acc, curr) => acc + parseFloat(curr.confidence), 0) / results.length * 100).toFixed(1)}%
+                    {(results.reduce((acc, curr) => acc + parseFloat(curr.confidence), 0) / results.length).toFixed(2)}%
                   </p>
                 </div>
               </div>
@@ -167,20 +167,20 @@ function ResultsDisplay({ results, isLoading }) {
                       {result.prediction}
                     </p>
                   </div>
-                  
+
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="text-gray-600 mb-2">Confidence Score:</p>
                     <div className="relative pt-1">
                       <div className="overflow-hidden h-3 mb-4 text-xs flex rounded bg-primary-100">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${result.confidence * 100}%` }}
+                          animate={{ width: `${result.confidence}%` }}
                           transition={{ duration: 1, delay: 0.5 }}
                           className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500"
                         />
                       </div>
                       <p className="text-2xl font-bold text-primary-600">
-                        {(result.confidence * 100).toFixed(1)}%
+                        {(result.confidence)}%
                       </p>
                     </div>
                   </div>
@@ -208,3 +208,4 @@ function ResultsDisplay({ results, isLoading }) {
 }
 
 export default ResultsDisplay;
+

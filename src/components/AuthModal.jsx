@@ -1,30 +1,37 @@
-import { Fragment, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { motion } from 'framer-motion';
-import { FiUser, FiMail, FiLock, FiX } from 'react-icons/fi';
+"use client"
 
-export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
-  const [authMode, setAuthMode] = useState(mode);
+import { Fragment, useState } from "react"
+import { Dialog, Transition } from "@headlessui/react"
+import { motion } from "framer-motion"
+import { FiUser, FiMail, FiLock, FiX } from "react-icons/fi"
+
+export default function AuthModal({ isOpen, setIsOpen, onSuccess, mode = "login" }) {
+  const [authMode, setAuthMode] = useState(mode)
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+    name: "",
+    email: "",
+    password: "",
+  })
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     // Handle authentication here
-    console.log('Form submitted:', formData);
-    setIsOpen(false);
-  };
+    console.log("Form submitted:", formData)
+
+    // In a real app, you would validate with a backend
+    // For demo purposes, we'll just simulate a successful login
+    onSuccess({
+      id: "123",
+      name: formData.name || "Demo User",
+      email: formData.email,
+    })
+
+    setIsOpen(false)
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog
-        as="div"
-        className="relative z-50"
-        onClose={() => setIsOpen(false)}
-      >
+      <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -50,26 +57,18 @@ export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <div className="flex justify-between items-center mb-6">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                    {authMode === "login" ? "Welcome Back" : "Create Account"}
                   </Dialog.Title>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="text-gray-400 hover:text-gray-500"
-                  >
+                  <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-500">
                     <FiX className="w-5 h-5" />
                   </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {authMode === 'register' && (
+                  {authMode === "register" && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Name
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700">Name</label>
                       <div className="mt-1 relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <FiUser className="text-gray-400" />
@@ -86,9 +85,7 @@ export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Email
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <FiMail className="text-gray-400" />
@@ -99,14 +96,13 @@ export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
                         placeholder="you@example.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Password
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700">Password</label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <FiLock className="text-gray-400" />
@@ -117,6 +113,7 @@ export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
                         placeholder="••••••••"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        required
                       />
                     </div>
                   </div>
@@ -127,18 +124,16 @@ export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                   >
-                    {authMode === 'login' ? 'Sign In' : 'Create Account'}
+                    {authMode === "login" ? "Sign In" : "Create Account"}
                   </motion.button>
                 </form>
 
                 <div className="mt-4 text-center text-sm">
                   <button
                     className="text-primary-600 hover:text-primary-500"
-                    onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+                    onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}
                   >
-                    {authMode === 'login'
-                      ? "Don't have an account? Sign up"
-                      : 'Already have an account? Sign in'}
+                    {authMode === "login" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
                   </button>
                 </div>
               </Dialog.Panel>
@@ -147,5 +142,7 @@ export default function AuthModal({ isOpen, setIsOpen, mode = 'login' }) {
         </div>
       </Dialog>
     </Transition>
-  );
+  )
 }
+
+

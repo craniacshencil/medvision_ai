@@ -1,7 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiLoader, FiAlertCircle, FiCheckCircle, FiBarChart2, FiCalendar, FiClock } from 'react-icons/fi';
-import { Line } from 'react-chartjs-2';
-import { format } from 'date-fns';
+"use client"
+
+import { motion, AnimatePresence } from "framer-motion"
+import { FiLoader, FiAlertCircle, FiCheckCircle, FiBarChart2, FiCalendar, FiClock } from "react-icons/fi"
+import { Line } from "react-chartjs-2"
+import { format } from "date-fns"
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,18 +12,10 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
-} from 'chart.js';
+  Legend,
+} from "chart.js"
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 function ResultsDisplay({ results, isLoading }) {
   if (isLoading) {
@@ -35,7 +29,7 @@ function ResultsDisplay({ results, isLoading }) {
         <FiLoader className="w-8 h-8 text-primary-500 animate-spin" />
         <span className="ml-3 text-gray-600">Processing images...</span>
       </motion.div>
-    );
+    )
   }
 
   if (!results.length) {
@@ -49,30 +43,36 @@ function ResultsDisplay({ results, isLoading }) {
         <p className="text-lg">No results to display.</p>
         <p className="text-sm">Upload some images to get started.</p>
       </motion.div>
-    );
+    )
   }
 
   const chartData = {
     labels: results.map((_, index) => `Analysis ${index + 1}`),
     datasets: [
       {
-        label: 'Confidence Score',
-        data: results.map(result => parseFloat(result.confidence)),
+        label: "Confidence Score",
+        data: results.map((result) => Number.parseFloat(result.confidence)),
         fill: false,
-        borderColor: 'rgb(34, 197, 94)',
+        borderColor: "rgb(34, 197, 94)",
         tension: 0.4,
-      }
-    ]
-  };
+      },
+    ],
+  }
+
+  // Group results by model type
+  const resultsByModel = results.reduce((acc, result) => {
+    const modelType = result.modelType || "general"
+    if (!acc[modelType]) {
+      acc[modelType] = []
+    }
+    acc[modelType].push(result)
+    return acc
+  }, {})
 
   return (
     <AnimatePresence>
       <div className="space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
           <h2 className="text-2xl font-bold text-primary-600 mb-4">Analysis Summary</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-primary-50 rounded-lg p-4">
@@ -90,7 +90,10 @@ function ResultsDisplay({ results, isLoading }) {
                 <div>
                   <p className="text-sm text-gray-600">Average Confidence</p>
                   <p className="text-2xl font-bold text-primary-600">
-                    {(results.reduce((acc, curr) => acc + parseFloat(curr.confidence), 0) / results.length).toFixed(2)}%
+                    {(
+                      results.reduce((acc, curr) => acc + Number.parseFloat(curr.confidence), 0) / results.length
+                    ).toFixed(2)}
+                    %
                   </p>
                 </div>
               </div>
@@ -101,7 +104,7 @@ function ResultsDisplay({ results, isLoading }) {
                 <div>
                   <p className="text-sm text-gray-600">Latest Analysis</p>
                   <p className="text-lg font-bold text-primary-600">
-                    {format(new Date(results[results.length - 1].timestamp), 'MMM d, yyyy')}
+                    {format(new Date(results[results.length - 1].timestamp), "MMM d, yyyy")}
                   </p>
                 </div>
               </div>
@@ -111,101 +114,112 @@ function ResultsDisplay({ results, isLoading }) {
           <div className="mt-8">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">Confidence Trend</h3>
             <div className="h-64">
-              <Line data={chartData} options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'top',
+              <Line
+                data={chartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: "top",
+                    },
                   },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 1,
-                  }
-                }
-              }} />
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      max: 1,
+                    },
+                  },
+                }}
+              />
             </div>
           </div>
         </motion.div>
 
-        {results.map((result, index) => (
-          <motion.div
-            key={result.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="card"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <div className="flex items-center space-x-3 mb-4">
-                  <h3 className="font-semibold text-lg">{result.filename}</h3>
-                  <span className="text-sm text-gray-500 flex items-center">
-                    <FiCalendar className="w-4 h-4 mr-1" />
-                    {format(new Date(result.timestamp), 'MMM d, yyyy HH:mm')}
-                  </span>
-                </div>
-                <motion.img
-                  whileHover={{ scale: 1.02 }}
-                  src={result.imageUrl}
-                  alt="Uploaded medical image"
-                  className="w-full rounded-lg shadow-md transition-transform duration-300"
-                />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-700 mb-4">Analysis Results</h4>
-                <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-gray-600 mb-2">Prediction:</p>
-                    <p className={`text-2xl font-bold ${
-                      result.prediction === 'Normal' 
-                        ? 'text-green-600' 
-                        : 'text-red-600'
-                    }`}>
-                      {result.prediction}
-                    </p>
-                  </div>
+        {/* Display results grouped by model type */}
+        {Object.entries(resultsByModel).map(([modelType, modelResults]) => (
+          <motion.div key={modelType} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+            <h3 className="text-xl font-bold text-primary-600 mb-4 capitalize">{modelType} Analysis Results</h3>
 
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-gray-600 mb-2">Confidence Score:</p>
-                    <div className="relative pt-1">
-                      <div className="overflow-hidden h-3 mb-4 text-xs flex rounded bg-primary-100">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${result.confidence}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500"
-                        />
+            <div className="space-y-6">
+              {modelResults.map((result, index) => (
+                <motion.div
+                  key={result.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="border-t pt-6 first:border-t-0 first:pt-0"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="flex items-center space-x-3 mb-4">
+                        <h4 className="font-semibold text-lg">{result.filename}</h4>
+                        <span className="text-sm text-gray-500 flex items-center">
+                          <FiCalendar className="w-4 h-4 mr-1" />
+                          {format(new Date(result.timestamp), "MMM d, yyyy HH:mm")}
+                        </span>
                       </div>
-                      <p className="text-2xl font-bold text-primary-600">
-                        {(result.confidence)}%
-                      </p>
+                      <motion.img
+                        whileHover={{ scale: 1.02 }}
+                        src={result.imageUrl}
+                        alt="Uploaded medical image"
+                        className="w-full rounded-lg shadow-md transition-transform duration-300"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-4">Analysis Results</h4>
+                      <div className="space-y-6">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-gray-600 mb-2">Prediction:</p>
+                          <p
+                            className={`text-2xl font-bold ${
+                              result.prediction === "Normal" ? "text-green-600" : "text-red-600"
+                            }`}
+                          >
+                            {result.prediction}
+                          </p>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-gray-600 mb-2">Confidence Score:</p>
+                          <div className="relative pt-1">
+                            <div className="overflow-hidden h-3 mb-4 text-xs flex rounded bg-primary-100">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${result.confidence}%` }}
+                                transition={{ duration: 1, delay: 0.5 }}
+                                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500"
+                              />
+                            </div>
+                            <p className="text-2xl font-bold text-primary-600">{result.confidence}%</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-600 mb-2">Region Analysis (Grad-CAM):</p>
+                          <motion.img
+                            whileHover={{ scale: 1.02 }}
+                            src={result.heatmapUrl}
+                            alt="Grad-CAM heatmap"
+                            className="w-full rounded-lg shadow-md transition-transform duration-300"
+                          />
+                          <p className="text-sm text-gray-500 mt-2">
+                            Highlighted regions indicate areas of interest for the prediction
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div>
-                    <p className="text-gray-600 mb-2">Region Analysis (Grad-CAM):</p>
-                    <motion.img
-                      whileHover={{ scale: 1.02 }}
-                      src={result.heatmapUrl}
-                      alt="Grad-CAM heatmap"
-                      className="w-full rounded-lg shadow-md transition-transform duration-300"
-                    />
-                    <p className="text-sm text-gray-500 mt-2">
-                      Highlighted regions indicate areas of interest for the prediction
-                    </p>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         ))}
       </div>
     </AnimatePresence>
-  );
+  )
 }
 
-export default ResultsDisplay;
+export default ResultsDisplay
+
 
